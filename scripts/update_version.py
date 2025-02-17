@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022)
+# Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022-2025)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ Someone finds a bug so you release a new internal version for testing.
 Then we can go to alpha, rc1, rc2, etc. but eventually its
 0.15.3
 """
+
 import fileinput
 import os
 import re
@@ -59,7 +60,18 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 # there.
 PYTHON = {"lib/setup.py": r"(?P<pre>.*VERSION = \").*(?P<post>\"  # PEP-440$)"}
 
-NODE = {"frontend/package.json": r'(?P<pre>^  "version": ").*(?P<post>",$)'}
+# This regex captures the "version": field in a JSON-like structure
+# allowing for any amount of whitespace before the "version": field.
+regex = r'(?P<pre>^ \s*"version": ").*(?P<post>",$)'
+NODE_PACKAGES = [
+    {"frontend/package.json": regex},
+    {"frontend/app/package.json": regex},
+    {"frontend/connection/package.json": regex},
+    {"frontend/lib/package.json": regex},
+    {"frontend/protobuf/package.json": regex},
+    {"frontend/typescript-config/package.json": regex},
+    {"frontend/utils/package.json": regex},
+]
 
 
 def verify_pep440(version):
@@ -85,7 +97,7 @@ def verify_semver(version):
     """
 
     try:
-        return str(semver.VersionInfo.parse(version))
+        return str(semver.Version.parse(version))
     except ValueError as e:
         raise (e)
 
@@ -131,7 +143,8 @@ def main():
         )
 
     update_files(PYTHON, pep440_version)
-    update_files(NODE, semver_version)
+    for package in NODE_PACKAGES:
+        update_files(package, semver_version)
 
 
 if __name__ == "__main__":

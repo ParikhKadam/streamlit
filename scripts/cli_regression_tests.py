@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022)
+# Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022-2025)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -154,12 +154,12 @@ class TestCLIRegressions:
         reason="Skip version verification when `SKIP_VERSION_CHECK` env var is set",
     )
     def test_streamlit_version(self):
-        assert (
-            STREAMLIT_RELEASE_VERSION != None and STREAMLIT_RELEASE_VERSION != ""
-        ), "You must set the $STREAMLIT_RELEASE_VERSION env variable"
-        assert STREAMLIT_RELEASE_VERSION in self.run_command(
-            "streamlit version"
-        ), f"Package version does not match the desired version of {STREAMLIT_RELEASE_VERSION}"
+        assert STREAMLIT_RELEASE_VERSION != None and STREAMLIT_RELEASE_VERSION != "", (
+            "You must set the $STREAMLIT_RELEASE_VERSION env variable"
+        )
+        assert STREAMLIT_RELEASE_VERSION in self.run_command("streamlit version"), (
+            f"Package version does not match the desired version of {STREAMLIT_RELEASE_VERSION}"
+        )
 
     def test_streamlit_activate(self):
         process = subprocess.Popen(
@@ -170,9 +170,9 @@ class TestCLIRegressions:
         process.communicate()
 
         with open(CREDENTIALS_FILE_PATH) as f:
-            assert (
-                "regressiontest@streamlit.io" in f.read()
-            ), "Email address was not found in the credentials file"
+            assert "regressiontest@streamlit.io" in f.read(), (
+                "Email address was not found in the credentials file"
+            )
 
     def test_port_reassigned(self):
         """When starting a new Streamlit session, it will run on port 8501 by default. If 8501 is
@@ -180,8 +180,8 @@ class TestCLIRegressions:
         """
 
         out_one, out_two = self.run_double_proc(
-            f"streamlit run --server.headless=true {REPO_ROOT}/examples/file_uploader.py",
-            f"streamlit run --server.headless=true {REPO_ROOT}/examples/file_uploader.py",
+            f"streamlit run --server.headless=true {REPO_ROOT}/e2e_playwright/st_file_uploader.py",
+            f"streamlit run --server.headless=true {REPO_ROOT}/e2e_playwright/st_file_uploader.py",
         )
 
         assert ":8501" in out_one, f"Incorrect port. See output:\n{out_one}"
@@ -189,18 +189,18 @@ class TestCLIRegressions:
 
     def test_conflicting_port(self):
         out_one, out_two = self.run_double_proc(
-            f"streamlit run --server.headless=true {REPO_ROOT}/examples/file_uploader.py",
-            f"streamlit run --server.headless=true --server.port=8501 {REPO_ROOT}/examples/file_uploader.py",
+            f"streamlit run --server.headless=true {REPO_ROOT}/e2e_playwright/st_file_uploader.py",
+            f"streamlit run --server.headless=true --server.port=8501 {REPO_ROOT}/e2e_playwright/st_file_uploader.py",
         )
 
         assert ":8501" in out_one, f"Incorrect port. See output:\n{out_one}"
-        assert (
-            "Port 8501 is already in use" in out_two
-        ), f"Incorrect conflict. See output:\n{out_one}"
+        assert "Port 8501 is already in use" in out_two, (
+            f"Incorrect conflict. See output:\n{out_one}"
+        )
 
     def test_cli_defined_port(self):
         out = self.run_single_proc(
-            f"streamlit run --server.headless=true --server.port=9999 {REPO_ROOT}/examples/file_uploader.py",
+            f"streamlit run --server.headless=true --server.port=9999 {REPO_ROOT}/e2e_playwright/st_file_uploader.py",
         )
 
         assert ":9999" in out, f"Incorrect port. See output:\n{out}"
@@ -210,7 +210,7 @@ class TestCLIRegressions:
             file.write("[server]\n  port=8888")
 
         out = self.run_single_proc(
-            f"streamlit run --server.headless=true {REPO_ROOT}/examples/file_uploader.py",
+            f"streamlit run --server.headless=true {REPO_ROOT}/e2e_playwright/st_file_uploader.py",
         )
 
         assert ":8888" in out, f"Incorrect port. See output:\n{out}"
